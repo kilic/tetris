@@ -1,0 +1,47 @@
+[package]
+edition = "2021"
+name = "tetris"
+version = "0.1.0"
+
+[dependencies]
+ark-ec = {version = "^0.4.0", optional = true, default-features = false}
+ark-ff = {version = "^0.4.0", optional = true, default-features = false}
+ark-serialize = {version = "^0.4.0", optional = true, default-features = false}
+halo2_proofs = {package = "halo2_proofs", git = "https://github.com/privacy-scaling-explorations/halo2", default-features = false, optional = true}
+p3-field = {version = "0.1.0", optional = true}
+
+ark-std = {version = "^0.4.0", default-features = false}
+itertools = "0.13"
+
+blake2 = "0.10.6"
+digest = "0.10.3"
+sha2 = "0.10.8"
+
+num-bigint = {version = "0.4", features = ["rand"]}
+num-integer = "0.1"
+num-traits = "0.2"
+
+rand = "0.8"
+rand_core = {version = "0.6", default-features = false}
+
+[dev-dependencies]
+ark-bn254 = {version = "0.4.0"}
+ark-crypto-primitives = {version = "0.4.0", features = ["sponge"]}
+ark-secp256k1 = {version = "0.4.0"}
+hex = "0.4"
+p3-goldilocks = {version = "0.1.0"}
+rand_xorshift = "0.3"
+rsa = {version = "0.9.6", features = ["sha2"]}
+
+[features]
+default = ["inspect", "synth-sanity"]
+
+arkworks = ["ark-ff", "ark-ec", "ark-serialize"]
+halo2 = ["halo2_proofs", "halo2_proofs?/circuit-params"]
+inspect = []
+p3 = ["p3-field"]
+synth-sanity = []
+timer = ["ark-std/print-trace"]
+
+[profile.release]
+debug = true
