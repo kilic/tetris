@@ -510,8 +510,6 @@ impl<N: Field> Rns<N> {
         range: &Range,
     ) -> Result<VarBig<N>, Error> {
         let int = int.map(|int| int.to_bigint().unwrap());
-        int.as_ref()
-            .map(|e| println!("assign: {}", e.to_str_radix(16)));
         self._assign_internal(ac, int.as_ref(), false, range)
     }
 

@@ -196,6 +196,13 @@ impl BNPairing for Halo2BNPairing {
     }
 }
 
+fn eval(f: &mut Fq12, lambda: Fq2, p1: &G1Affine, t_x: Fq2, t_y: Fq2) {
+    let c1 = Fq2::new(lambda.c0() * p1.x, lambda.c1() * p1.x);
+    let t = lambda * t_x - t_y;
+    let c3 = Fq2::new(t.c0() * p1.y, t.c1() * p1.y);
+    Fq12::mul_by_034(f, &Fq2::one(), &c1, &c3);
+}
+
 pub(crate) fn add(acc: &mut G2Affine, p2: &G2Affine, neg: bool) -> Fq2 {
     let t0 = if neg { acc.y + p2.y } else { acc.y - p2.y };
     let t1 = (acc.x - p2.x).invert().unwrap();
@@ -205,13 +212,6 @@ pub(crate) fn add(acc: &mut G2Affine, p2: &G2Affine, neg: bool) -> Fq2 {
     acc.x = x3;
     acc.y = y3;
     lambda
-}
-
-fn eval(f: &mut Fq12, lambda: Fq2, p1: &G1Affine, t_x: Fq2, t_y: Fq2) {
-    let c1 = Fq2::new(lambda.c0() * p1.x, lambda.c1() * p1.x);
-    let t = lambda * t_x - t_y;
-    let c3 = Fq2::new(t.c0() * p1.y, t.c1() * p1.y);
-    Fq12::mul_by_034(f, &Fq2::one(), &c1, &c3);
 }
 
 pub(crate) fn double(acc: &mut G2Affine) -> Fq2 {

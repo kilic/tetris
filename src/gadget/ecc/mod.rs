@@ -9,6 +9,7 @@ use crate::{Error, Value};
 use std::fmt::Debug;
 
 // pub mod bn_pairing;
+pub mod bw6;
 pub mod compat;
 pub mod ecc_base_field;
 pub mod ecc_general;
@@ -305,7 +306,7 @@ pub trait EccGadget<C: Curve, N: Field> {
         b: &Point<VarBig<N>>,
     ) -> Point<VarBig<N>> {
         let ch = self.base_field_crt();
-        // lambda = b_y - a_y / b_x - a_x
+        // lambda = b_y + a_y / b_x - a_x
         let numer = &b.y.add(ac, &a.y);
         let denom = &a.x.sub(ac, &b.x);
         let lambda = &ch.div(ac, numer, denom);
