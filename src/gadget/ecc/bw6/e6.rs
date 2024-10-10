@@ -1,13 +1,10 @@
+use super::{e3::E3, witness::Bw6Pairing, Bw6PairingGadget};
 use crate::{
     gadget::{big_field::VarBig, ecc::Curve},
     ir::ac::AbstractCircuit,
-    Error, Field, Value, Var,
+    Error, Field, Value,
 };
-
-use halo2_proofs::halo2curves::bw6::{Fq, Fq3, Fq6};
 use num_bigint::BigUint;
-
-use super::{e3::E3, witness::Bw6Pairing, Bw6PairingGadget};
 
 #[derive(Clone, Debug)]
 pub struct E6<N> {
@@ -38,27 +35,16 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
         }
     }
 
-    pub(crate) fn e6_constant(
-        &self,
-        ac: &mut AbstractCircuit<N>,
-        e: E6<BigUint>,
-    ) -> Result<E6<VarBig<N>>, Error> {
-        Ok(E6 {
-            e0: self.e3_constant(ac, &e.e0)?,
-            e1: self.e3_constant(ac, &e.e1)?,
-        })
-    }
-
-    pub(crate) fn e6_reduce(
-        &self,
-        ac: &mut AbstractCircuit<N>,
-        e: &E6<VarBig<N>>,
-    ) -> E6<VarBig<N>> {
-        E6 {
-            e0: self.e3_reduce(ac, &e.e0),
-            e1: self.e3_reduce(ac, &e.e1),
-        }
-    }
+    // pub(crate) fn e6_reduce(
+    //     &self,
+    //     ac: &mut AbstractCircuit<N>,
+    //     e: &E6<VarBig<N>>,
+    // ) -> E6<VarBig<N>> {
+    //     E6 {
+    //         e0: self.e3_reduce(ac, &e.e0),
+    //         e1: self.e3_reduce(ac, &e.e1),
+    //     }
+    // }
 
     pub(crate) fn e6_sub(
         &self,
@@ -80,18 +66,6 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
             e0: self.e3_assign(ac, e.as_ref().map(|e| e.e0.clone()))?,
             e1: self.e3_assign(ac, e.as_ref().map(|e| e.e1.clone()))?,
         })
-    }
-
-    pub(crate) fn e6_select(
-        &self,
-        ac: &mut AbstractCircuit<N>,
-        cond: &Var<N>,
-        e0: &E6<VarBig<N>>,
-        e1: &E6<VarBig<N>>,
-    ) -> Result<E6<VarBig<N>>, Error> {
-        let t0 = self.e3_select(ac, cond, &e0.e0, &e1.e0)?;
-        let t1 = self.e3_select(ac, cond, &e0.e1, &e1.e1)?;
-        Ok(E6 { e0: t0, e1: t1 })
     }
 
     pub(crate) fn e6_mul(

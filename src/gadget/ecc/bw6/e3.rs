@@ -4,7 +4,7 @@ use crate::{
         ecc::Curve,
     },
     ir::ac::AbstractCircuit,
-    Error, Field, Value, Var,
+    Error, Field, Value,
 };
 use num_bigint::BigUint;
 use num_traits::One;
@@ -64,31 +64,6 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
         }
     }
 
-    pub(crate) fn e3_add_constant(
-        &self,
-        ac: &mut AbstractCircuit<N>,
-        a: &E3<VarBig<N>>,
-        b: &E3<Big<N>>,
-    ) -> E3<VarBig<N>> {
-        E3 {
-            e0: a.e0.add_constant(ac, &b.e0),
-            e1: a.e1.add_constant(ac, &b.e1),
-            e2: a.e2.add_constant(ac, &b.e2),
-        }
-    }
-
-    pub(crate) fn e3_normal_equal(
-        &self,
-        ac: &mut AbstractCircuit<N>,
-        a: &E3<VarBig<N>>,
-        b: &E3<VarBig<N>>,
-    ) -> Result<(), Error> {
-        self.base_field_crt.normal_equal(ac, &a.e0, &b.e0)?;
-        self.base_field_crt.normal_equal(ac, &a.e1, &b.e1)?;
-        self.base_field_crt.normal_equal(ac, &a.e2, &b.e2)?;
-        Ok(())
-    }
-
     pub(crate) fn e3_assert_zero(
         &self,
         ac: &mut AbstractCircuit<N>,
@@ -97,46 +72,6 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
         self.base_field_crt.assert_zero(ac, &a.e0)?;
         self.base_field_crt.assert_zero(ac, &a.e1)?;
         Ok(())
-    }
-
-    pub(crate) fn e3_select(
-        &self,
-        ac: &mut AbstractCircuit<N>,
-        cond: &Var<N>,
-        e0: &E3<VarBig<N>>,
-        e1: &E3<VarBig<N>>,
-    ) -> Result<E3<VarBig<N>>, Error> {
-        let t0 = e0.e0.select(ac, cond, &e1.e0)?;
-        let t1 = e0.e1.select(ac, cond, &e1.e1)?;
-        let t2 = e0.e2.select(ac, cond, &e1.e2)?;
-        Ok(E3 {
-            e0: t0,
-            e1: t1,
-            e2: t2,
-        })
-    }
-
-    pub(crate) fn e3_reduce(
-        &self,
-        ac: &mut AbstractCircuit<N>,
-        a: &E3<VarBig<N>>,
-    ) -> E3<VarBig<N>> {
-        E3 {
-            e0: self.base_field_crt.reduce(ac, &a.e0),
-            e1: self.base_field_crt.reduce(ac, &a.e1),
-            e2: self.base_field_crt.reduce(ac, &a.e2),
-        }
-    }
-
-    pub(crate) fn e3_constant(
-        &self,
-        ac: &mut AbstractCircuit<N>,
-        constant: &E3<BigUint>,
-    ) -> Result<E3<VarBig<N>>, Error> {
-        let e0 = self.base_field_crt.get_constant(ac, &constant.e0)?;
-        let e1 = self.base_field_crt.get_constant(ac, &constant.e1)?;
-        let e2 = self.base_field_crt.get_constant(ac, &constant.e2)?;
-        Ok(E3 { e0, e1, e2 })
     }
 
     pub(crate) fn e3_one(&self, ac: &mut AbstractCircuit<N>) -> E3<VarBig<N>> {
@@ -192,14 +127,6 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
         }
     }
 
-    pub(crate) fn e3_neg(&self, ac: &mut AbstractCircuit<N>, a: &E3<VarBig<N>>) -> E3<VarBig<N>> {
-        E3 {
-            e0: self.base_field_crt.neg(ac, &a.e0),
-            e1: self.base_field_crt.neg(ac, &a.e1),
-            e2: self.base_field_crt.neg(ac, &a.e2),
-        }
-    }
-
     pub(crate) fn e3_mul_by_01(
         &self,
         ac: &mut AbstractCircuit<N>,
@@ -223,11 +150,11 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
         let tmp = &a.e0.add(ac, &a.e1);
         let t2 = crt.mul(ac, tmp, &t2, &[], &[&aa, &bb]);
 
-        let ret = E3 {
+        E3 {
             e0: t1,
             e1: t2,
             e2: t3,
-        };
+        }
 
         // #[cfg(test)]
         // {
@@ -254,8 +181,6 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
         //         assert_eq!(c0, c1);
         //     });
         // }
-
-        ret
     }
 
     pub(crate) fn mul_by_non_residue(
@@ -350,7 +275,7 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
         let t4 = b.e0.add(ac, &b.e2);
         let e2 = crt.mul(ac, &t3, &t4, &[&t1], &[&t0, &t2]);
 
-        let ret = E3 { e0, e1, e2 };
+        E3 { e0, e1, e2 }
 
         // #[cfg(test)]
         // {
@@ -373,8 +298,6 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
         //         assert_eq!(c0, c1);
         //     });
         // }
-
-        ret
     }
 
     pub(crate) fn e3_mul_constant(
@@ -416,4 +339,60 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
             .mul_constant(ac, &a.e2, &self.frobenius_3c2, &[], &[]);
         E3 { e0, e1, e2 }
     }
+
+    // pub(crate) fn e3_add_constant(
+    //     &self,
+    //     ac: &mut AbstractCircuit<N>,
+    //     a: &E3<VarBig<N>>,
+    //     b: &E3<Big<N>>,
+    // ) -> E3<VarBig<N>> {
+    //     E3 {
+    //         e0: a.e0.add_constant(ac, &b.e0),
+    //         e1: a.e1.add_constant(ac, &b.e1),
+    //         e2: a.e2.add_constant(ac, &b.e2),
+    //     }
+    // }
+
+    // pub(crate) fn e3_normal_equal(
+    //     &self,
+    //     ac: &mut AbstractCircuit<N>,
+    //     a: &E3<VarBig<N>>,
+    //     b: &E3<VarBig<N>>,
+    // ) -> Result<(), Error> {
+    //     self.base_field_crt.normal_equal(ac, &a.e0, &b.e0)?;
+    //     self.base_field_crt.normal_equal(ac, &a.e1, &b.e1)?;
+    //     self.base_field_crt.normal_equal(ac, &a.e2, &b.e2)?;
+    //     Ok(())
+    // }
+
+    // pub(crate) fn e3_reduce(
+    //     &self,
+    //     ac: &mut AbstractCircuit<N>,
+    //     a: &E3<VarBig<N>>,
+    // ) -> E3<VarBig<N>> {
+    //     E3 {
+    //         e0: self.base_field_crt.reduce(ac, &a.e0),
+    //         e1: self.base_field_crt.reduce(ac, &a.e1),
+    //         e2: self.base_field_crt.reduce(ac, &a.e2),
+    //     }
+    // }
+
+    // pub(crate) fn e3_constant(
+    //     &self,
+    //     ac: &mut AbstractCircuit<N>,
+    //     constant: &E3<BigUint>,
+    // ) -> Result<E3<VarBig<N>>, Error> {
+    //     let e0 = self.base_field_crt.get_constant(ac, &constant.e0)?;
+    //     let e1 = self.base_field_crt.get_constant(ac, &constant.e1)?;
+    //     let e2 = self.base_field_crt.get_constant(ac, &constant.e2)?;
+    //     Ok(E3 { e0, e1, e2 })
+    // }
+
+    // pub(crate) fn e3_neg(&self, ac: &mut AbstractCircuit<N>, a: &E3<VarBig<N>>) -> E3<VarBig<N>> {
+    //     E3 {
+    //         e0: self.base_field_crt.neg(ac, &a.e0),
+    //         e1: self.base_field_crt.neg(ac, &a.e1),
+    //         e2: self.base_field_crt.neg(ac, &a.e2),
+    //     }
+    // }
 }

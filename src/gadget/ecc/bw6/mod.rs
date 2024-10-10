@@ -4,9 +4,7 @@ use crate::{
     ir::ac::AbstractCircuit,
     Error, Field, Value,
 };
-use e3::E3;
 use e6::E6;
-use halo2_proofs::halo2curves::bw6::{Fq6, G1};
 use itertools::Itertools;
 use num_bigint::BigUint;
 use witness::Bw6Pairing;
@@ -15,8 +13,8 @@ use super::{ecc_general::GeneralEccGadget, Curve};
 
 mod e3;
 mod e6;
-mod halo2;
-mod witness;
+pub mod halo2;
+pub mod witness;
 
 // x+1
 // Alligned with LOOP_2_NAF
@@ -51,23 +49,40 @@ impl<N: Field> Point<VarBig<N>> {
 
 pub struct Bw6PairingGadget<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> {
     base_field_crt: CrtGadget<N>,
-    g1: GeneralEccGadget<G1, N>,
-    g2: GeneralEccGadget<G2, N>,
-    pairing: Pairing,
+    _g1: GeneralEccGadget<G1, N>,
+    _g2: GeneralEccGadget<G2, N>,
+    // pairing: Pairing,
     zeta: Big<N>,
     frobenius_3c1: Big<N>,
     frobenius_3c2: Big<N>,
     frobenius_6c1: Big<N>,
-}
-
-pub(crate) fn constant_e3<N: Field>(crt: &CrtGadget<N>, e: &E3<BigUint>) -> E3<Big<N>> {
-    let e0 = crt.rns().big_from_uint(&e.e0);
-    let e1 = crt.rns().big_from_uint(&e.e1);
-    let e2 = crt.rns().big_from_uint(&e.e2);
-    E3::new(e0, e1, e2)
+    _marker: std::marker::PhantomData<Pairing>,
 }
 
 impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1, G2, Pairing> {
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        base_field_crt: CrtGadget<N>,
+        g1: GeneralEccGadget<G1, N>,
+        g2: GeneralEccGadget<G2, N>,
+
+        zeta: Big<N>,
+        frobenius_3c1: Big<N>,
+        frobenius_3c2: Big<N>,
+        frobenius_6c1: Big<N>,
+    ) -> Self {
+        Self {
+            base_field_crt,
+            _g1: g1,
+            _g2: g2,
+            zeta,
+            frobenius_3c1,
+            frobenius_3c2,
+            frobenius_6c1,
+            _marker: std::marker::PhantomData,
+        }
+    }
+
     pub fn assign_base_field(
         &self,
         ac: &mut AbstractCircuit<N>,
@@ -265,6 +280,8 @@ impl<N: Field, G1: Curve, G2: Curve, Pairing: Bw6Pairing> Bw6PairingGadget<N, G1
             .zip(LOOP_1_NAF.iter().skip(1).rev().skip(1))
         {
             let x = x2 * 3 + x1;
+
+            // f = self.e6_reduce(ac, &f);
             f = self.e6_square(ac, &f);
 
             p1_var

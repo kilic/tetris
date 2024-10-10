@@ -7,8 +7,8 @@ version = "0.1.0"
 ark-ec = {version = "^0.4.0", optional = true, default-features = false}
 ark-ff = {version = "^0.4.0", optional = true, default-features = false}
 ark-serialize = {version = "^0.4.0", optional = true, default-features = false}
-# halo2_proofs = {package = "halo2_proofs", git = "https://github.com/privacy-scaling-explorations/halo2", default-features = false, optional = true}
-halo2_proofs = {package = "halo2_proofs", "path" = "../../privacy-scaling-explorations/halo2/halo2_proofs", default-features = false, optional = true}
+halo2_proofs = {package = "halo2_proofs", git = "https://github.com/kilic/halo2", branch = "bls377-bw6", default-features = false, optional = true}
+# halo2_proofs = {package = "halo2_proofs", "path" = "../../privacy-scaling-explorations/halo2/halo2_proofs", default-features = false, optional = true}
 p3-field = {version = "0.1.0", optional = true}
 
 ark-std = {version = "^0.4.0", default-features = false}
@@ -35,7 +35,7 @@ rand_xorshift = "0.3"
 rsa = {version = "0.9.6", features = ["sha2"]}
 
 [features]
-default = ["inspect", "synth-sanity", "halo2"]
+default = ["inspect", "synth-sanity", "halo2", "timer"]
 
 arkworks = ["ark-ff", "ark-ec", "ark-serialize"]
 halo2 = ["halo2_proofs", "halo2_proofs?/circuit-params"]

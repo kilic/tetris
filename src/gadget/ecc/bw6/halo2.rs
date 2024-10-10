@@ -1,9 +1,6 @@
 use super::{e3::E3, e6::E6, witness::Bw6Pairing, LOOP_1_NAF, LOOP_2_NAF};
 use crate::{
-    gadget::{
-        big_field::VarBig,
-        ecc::{Coordinates, Point},
-    },
+    gadget::{big_field::VarBig, ecc::Point},
     Error, Field, Value,
 };
 use halo2_proofs::arithmetic::CurveAffine;
@@ -112,10 +109,10 @@ impl Bw6Pairing for Halo2Bw6Pairing {
         let f = miller_loop(&p1, &p2, &Fq6::one());
         let c = r_inv(&f);
         let c = m_inv(&c);
-        {
-            let is_one = miller_loop(&p1, &p2, &c);
-            assert_eq!(is_one, Fq6::one());
-        }
+        // {
+        //     let is_one = miller_loop(&p1, &p2, &c);
+        //     assert_eq!(is_one, Fq6::one());
+        // }
         (&c).into()
     }
 
@@ -312,6 +309,8 @@ pub(crate) mod test {
     use crate::gadget::ecc::bw6::Bw6PairingGadget;
     use crate::gadget::ecc::ecc_general::GeneralEccGadget;
     use crate::gadget::ecc::EccGadget;
+    use crate::halo2::config::{GateConfig, RangeGateConfig};
+    use crate::halo2::test::{run_kzg_prover, run_mock_prover, Synth};
     use crate::ir::ac::{AbstractCircuit, AbstractConfig};
     use crate::utils::test::xor_rng;
     use crate::Field;
@@ -328,11 +327,11 @@ pub(crate) mod test {
     use num_traits::Num;
 
     fn new_pairing_gadget<N: Field>() -> Bw6PairingGadget<N, G1, G2, Halo2Bw6Pairing> {
-        let base_field_crt = CrtGadget::new(120, 20, &Fq::modulus());
+        let base_field_crt = CrtGadget::new(102, 17, &Fq::modulus());
         let g1: GeneralEccGadget<G1, N> =
-            GeneralEccGadget::new(120, &Fr::modulus(), 120, &Fq::modulus(), 20);
+            GeneralEccGadget::new(102, &Fr::modulus(), 102, &Fq::modulus(), 17);
         let g2: GeneralEccGadget<G2, N> =
-            GeneralEccGadget::new(120, &Fr::modulus(), 120, &Fq::modulus(), 20);
+            GeneralEccGadget::new(102, &Fr::modulus(), 102, &Fq::modulus(), 17);
 
         let zeta = base_field_crt.rns.big_from_uint(&(Fq::ZETA).uint());
         let frobenius_3c1 = base_field_crt
@@ -344,21 +343,21 @@ pub(crate) mod test {
         let frobenius_6c1 = base_field_crt
             .rns
             .big_from_uint(&FROBENIUS_COEFF_FQ6_C1[1].uint());
-        let pairing = Halo2Bw6Pairing;
+
         Bw6PairingGadget {
             base_field_crt,
-            g1,
-            g2,
+            _g1: g1,
+            _g2: g2,
             zeta,
             frobenius_3c1,
             frobenius_3c2,
             frobenius_6c1,
-            pairing,
+            _marker: std::marker::PhantomData,
         }
     }
 
-    pub(crate) fn pairing_test(
-        ac: &mut AbstractCircuit<Fr>,
+    pub(crate) fn pairing_test<N: Field>(
+        ac: &mut AbstractCircuit<N>,
         rng: &mut impl rand::RngCore,
         n: usize,
         n_fix: usize,
@@ -380,38 +379,38 @@ pub(crate) mod test {
 
         let pairing = new_pairing_gadget();
 
-        {
-            let p1 = p1
-                .iter()
-                .map(|p| pairing.g1.assign_point(ac, &p.to_curve().into()).unwrap())
-                .collect_vec();
-
-            let p2 = p2
-                .iter()
-                .map(|p| pairing.g2.assign_point(ac, &p.to_curve().into()).unwrap())
-                .collect_vec();
-
-            pairing.pairing_check(ac, &p1, &p2).unwrap();
-        }
-
         // {
         //     let p1 = p1
         //         .iter()
         //         .map(|p| pairing.g1.assign_point(ac, &p.to_curve().into()).unwrap())
         //         .collect_vec();
 
-        //     let (p1_var, p1_fix) = p1.split_at(n_fix);
-        //     let (p2_var, p2_fix) = p2.split_at(n_fix);
-
-        //     let p2_var = p2_var
+        //     let p2 = p2
         //         .iter()
         //         .map(|p| pairing.g2.assign_point(ac, &p.to_curve().into()).unwrap())
         //         .collect_vec();
-        //     let p2_fix = p2_fix.iter().map(Into::into).collect_vec();
-        //     pairing
-        //         .pairing_check_mixed(ac, p1_var, &p2_var, p1_fix, &p2_fix)
-        //         .unwrap();
+
+        //     pairing.pairing_check(ac, &p1, &p2).unwrap();
         // }
+
+        {
+            let p1 = p1
+                .iter()
+                .map(|p| pairing._g1.assign_point(ac, &p.to_curve().into()).unwrap())
+                .collect_vec();
+
+            let (p1_var, p1_fix) = p1.split_at(n_fix);
+            let (p2_var, p2_fix) = p2.split_at(n_fix);
+
+            let p2_var = p2_var
+                .iter()
+                .map(|p| pairing._g2.assign_point(ac, &p.to_curve().into()).unwrap())
+                .collect_vec();
+            let p2_fix = p2_fix.iter().map(Into::into).collect_vec();
+            pairing
+                .pairing_check_mixed(ac, p1_var, &p2_var, p1_fix, &p2_fix)
+                .unwrap();
+        }
 
         let forced_red = ac.get_log("big-field-forced-red");
         println!("big-field-forced-red: {}", forced_red);
@@ -420,6 +419,7 @@ pub(crate) mod test {
 
     #[test]
     fn test_pairing() {
+        use halo2_proofs::halo2curves::bn256::Fr;
         let cfg = AbstractConfig::default();
         let ac = &mut AbstractCircuit::<Fr>::new(cfg);
         let rng = &mut xor_rng();
@@ -430,6 +430,34 @@ pub(crate) mod test {
         let r_i = "28d323e134a5dd8d5d387d4ba8f487bf84d6e12a68cc2d52135e42d0ff3f010dd5d8b7279b08997e56ec93f17b1bc533d554658aff2a0f2bf3422352e59f8ab88cbda88b2f316fd54b4eef0b3d16c3969da45c667e271cb976b11ac1be78a3e06a74217d0720132c7499bbefffff7d906bbfffffffff77";
         let r_i = BigUint::from_str_radix(r_i, 16).unwrap();
         e.pow_vartime(r_i.to_u64_digits())
+    }
+
+    #[test]
+    fn bench_bw6_prover() {
+        #[derive(Clone, Default, Copy)]
+        struct TestCircuitSynth;
+        use halo2_proofs::halo2curves::bn256::Fr;
+        impl Synth<Fr> for TestCircuitSynth {
+            fn synth(&self, ac: &mut AbstractCircuit<Fr>, _public_inputs: &[Option<Fr>]) {
+                let mut rng = xor_rng();
+                pairing_test(ac, &mut rng, 4, 3);
+            }
+        }
+        let k = 20;
+        let cfg = GateConfig::new(
+            6,
+            Some(RangeGateConfig::Separate { n: 4 }),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            false,
+        );
+
+        run_mock_prover(k, &[], cfg, TestCircuitSynth);
+        run_kzg_prover(k, &[], cfg, TestCircuitSynth);
     }
 
     #[test]

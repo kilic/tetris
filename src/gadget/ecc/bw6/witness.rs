@@ -1,9 +1,6 @@
 use super::e6::E6;
 use crate::{
-    gadget::{
-        big_field::{Big, VarBig},
-        ecc::Point,
-    },
+    gadget::{big_field::VarBig, ecc::Point},
     Error, Field, Value,
 };
 use num_bigint::BigUint;

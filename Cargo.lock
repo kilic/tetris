@@ -451,6 +451,7 @@ dependencies = [
 [[package]]
 name = "halo2_backend"
 version = "0.4.0"
+source = "git+https://github.com/kilic/halo2?branch=bls377-bw6#da46741c49c4e0ebfed0950653003ed5cd94b904"
 dependencies = [
  "blake2b_simd",
  "ff",
@@ -467,6 +468,7 @@ dependencies = [
 [[package]]
 name = "halo2_frontend"
 version = "0.4.0"
+source = "git+https://github.com/kilic/halo2?branch=bls377-bw6#da46741c49c4e0ebfed0950653003ed5cd94b904"
 dependencies = [
  "blake2b_simd",
  "ff",
@@ -479,6 +481,7 @@ dependencies = [
 [[package]]
 name = "halo2_middleware"
 version = "0.4.0"
+source = "git+https://github.com/kilic/halo2?branch=bls377-bw6#da46741c49c4e0ebfed0950653003ed5cd94b904"
 dependencies = [
  "ff",
  "halo2curves",
@@ -488,6 +491,7 @@ dependencies = [
 [[package]]
 name = "halo2_proofs"
 version = "0.4.0"
+source = "git+https://github.com/kilic/halo2?branch=bls377-bw6#da46741c49c4e0ebfed0950653003ed5cd94b904"
 dependencies = [
  "group",
  "halo2_backend",
@@ -500,6 +504,7 @@ dependencies = [
 [[package]]
 name = "halo2curves"
 version = "0.7.0"
+source = "git+https://github.com/kilic/halo2curves?branch=bls377-bw6#a96d5db0f97144605391087112bebaa2af1dc502"
 dependencies = [
  "blake2",
  "digest 0.10.7",
@@ -525,6 +530,7 @@ dependencies = [
 [[package]]
 name = "halo2derive"
 version = "0.1.0"
+source = "git+https://github.com/kilic/halo2curves?branch=bls377-bw6#a96d5db0f97144605391087112bebaa2af1dc502"
 dependencies = [
  "num-bigint",
  "num-integer",
