@@ -281,7 +281,7 @@ pub fn rand_synth_arithmetic_ir<F: Field>(ac: &mut AbstractCircuit<F>, rng: &mut
         let w0 = &ac.get_constant(c0);
         let w0_constant = &ac.get_constant(c0);
         ac.equal(w0_constant, w0).unwrap();
-        ac.assert_equal_to_constant(w0, c0).unwrap();
+        ac.equal_to_constant(w0, c0).unwrap();
     }
 
     // arithmetic
@@ -289,22 +289,22 @@ pub fn rand_synth_arithmetic_ir<F: Field>(ac: &mut AbstractCircuit<F>, rng: &mut
         let x0 = F::rand(rng);
         let x1 = F::rand(rng);
         let w0 = &ac.assign(&x0.into());
-        ac.assert_equal_to_constant(w0, x0).unwrap();
+        ac.equal_to_constant(w0, x0).unwrap();
         let w1 = &ac.assign(&x1.into());
-        ac.assert_equal_to_constant(w1, x1).unwrap();
+        ac.equal_to_constant(w1, x1).unwrap();
 
         {
             // add
             let w0w1 = &ac.add(w0, w1);
             let w1w0 = &ac.add(w1, w0);
             ac.equal(w0w1, w1w0).unwrap();
-            ac.assert_equal_to_constant(w0w1, x0 + x1).unwrap();
+            ac.equal_to_constant(w0w1, x0 + x1).unwrap();
             let must_be_w0w1 = &ac.add_constant(w0, x1);
             ac.equal(must_be_w0w1, w0w1).unwrap();
 
             // sub
             let u = &ac.sub(w0, w1);
-            ac.assert_equal_to_constant(u, x0 - x1).unwrap();
+            ac.equal_to_constant(u, x0 - x1).unwrap();
             let must_be_w0 = &ac.sub(w0w1, w1);
             let must_be_w1 = &ac.sub(w0w1, w0);
             ac.equal(must_be_w0, w0).unwrap();
@@ -314,7 +314,7 @@ pub fn rand_synth_arithmetic_ir<F: Field>(ac: &mut AbstractCircuit<F>, rng: &mut
         // mul
         {
             let w0w1 = &ac.mul(w0, w1);
-            ac.assert_equal_to_constant(w0w1, x0 * x1).unwrap();
+            ac.equal_to_constant(w0w1, x0 * x1).unwrap();
             let w1w0 = &ac.mul(w1, w0);
             ac.equal(w1w0, w0w1).unwrap();
 
@@ -438,31 +438,31 @@ pub fn rand_synth_memro_ir<F: Field>(
     let _w1 = ac.read(tag, F::zero(), f1).unwrap();
     w1.iter()
         .zip(_w1.iter())
-        .try_for_each(|(a, w)| ac.assert_equal_to_constant(w, *a))?;
+        .try_for_each(|(a, w)| ac.equal_to_constant(w, *a))?;
     let _w0 = ac.read(tag, F::zero(), f0).unwrap();
     w0.iter()
         .zip(_w0.iter())
-        .try_for_each(|(a, w)| ac.assert_equal_to_constant(w, *a))?;
+        .try_for_each(|(a, w)| ac.equal_to_constant(w, *a))?;
     let _w3 = ac.read(tag, F::zero(), f3).unwrap();
     w3.iter()
         .zip(_w3.iter())
-        .try_for_each(|(a, w)| ac.assert_equal_to_constant(w, *a))?;
+        .try_for_each(|(a, w)| ac.equal_to_constant(w, *a))?;
     let _w3 = ac.read(tag, F::zero(), f3).unwrap();
     w3.iter()
         .zip(_w3.iter())
-        .try_for_each(|(a, w)| ac.assert_equal_to_constant(w, *a))?;
+        .try_for_each(|(a, w)| ac.equal_to_constant(w, *a))?;
     let _w0 = ac.read(tag, F::zero(), f0).unwrap();
     w0.iter()
         .zip(_w0.iter())
-        .try_for_each(|(a, w)| ac.assert_equal_to_constant(w, *a))?;
+        .try_for_each(|(a, w)| ac.equal_to_constant(w, *a))?;
     let _w2 = ac.read(tag, F::zero(), f2).unwrap();
     w2.iter()
         .zip(_w2.iter())
-        .try_for_each(|(a, w)| ac.assert_equal_to_constant(w, *a))?;
+        .try_for_each(|(a, w)| ac.equal_to_constant(w, *a))?;
     let _w2 = ac.read(tag, F::zero(), f2).unwrap();
     w2.iter()
         .zip(_w2.iter())
-        .try_for_each(|(a, w)| ac.assert_equal_to_constant(w, *a))?;
+        .try_for_each(|(a, w)| ac.equal_to_constant(w, *a))?;
 
     Ok(())
 }

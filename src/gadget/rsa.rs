@@ -73,7 +73,7 @@ impl<N: Field> RsaGadget<N> {
         self.fixed_part
             .iter()
             .zip(padded.iter().rev())
-            .try_for_each(|(constant, byte)| ac.assert_equal_to_constant(byte.var(), *constant))?;
+            .try_for_each(|(constant, byte)| ac.equal_to_constant(byte.var(), *constant))?;
         let digest_part = hash.to_bytes(ac);
         digest_part
             .iter()

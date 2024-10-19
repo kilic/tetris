@@ -85,12 +85,12 @@ impl<F: Field> AbstractCircuit<F> {
         w
     }
 
-    pub fn assert_equal_to_constant(&mut self, w0: &Var<F>, constant: F) -> Result<(), Error> {
+    pub fn equal_to_constant(&mut self, w0: &Var<F>, constant: F) -> Result<(), Error> {
         self.zero_sum(lc!(-constant) + w0)
     }
 
     pub fn assert_zero(&mut self, w0: &Var<F>) -> Result<(), Error> {
-        self.assert_equal_to_constant(w0, F::zero())
+        self.equal_to_constant(w0, F::zero())
     }
 
     pub fn scale(&mut self, w0: &Scaled<F>) -> Var<F> {
@@ -99,7 +99,7 @@ impl<F: Field> AbstractCircuit<F> {
     }
 
     pub fn assert_one(&mut self, w0: &Var<F>) -> Result<(), Error> {
-        self.assert_equal_to_constant(w0, F::one())
+        self.equal_to_constant(w0, F::one())
     }
 
     pub fn add(&mut self, w0: &Var<F>, w1: &Var<F>) -> Var<F> {
