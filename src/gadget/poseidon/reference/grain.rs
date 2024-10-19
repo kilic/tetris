@@ -1,25 +1,8 @@
-use super::reference::MDS;
 use crate::Field;
 use num_bigint::BigUint;
 use std::marker::PhantomData;
 
-impl<F: Field> MDS<F> {
-    /// Given two `T` sized vector constructs the `t * t` Cauchy matrix
-    pub(crate) fn cauchy(xs: &[F], ys: &[F]) -> Self {
-        let t = xs.len();
-        assert!(xs.len() == ys.len());
-        let mut m = vec![F::zero(); t * t];
-
-        for (i, x) in xs.iter().enumerate() {
-            for (j, y) in ys.iter().enumerate() {
-                let sum = *x + *y;
-                assert!(!sum.is_zero());
-                m[i * t + j] = sum.inv().unwrap();
-            }
-        }
-        MDS::new(m)
-    }
-}
+use super::poseidon::Mds;
 
 /// Grain initializes round constants and MDS matrix at given sponge parameters
 pub(crate) struct Grain<F: Field> {
@@ -28,7 +11,7 @@ pub(crate) struct Grain<F: Field> {
 }
 
 impl<F: Field> Grain<F> {
-    pub(crate) fn generate(r_f: usize, r_p: usize, t: usize) -> (Vec<Vec<F>>, MDS<F>) {
+    pub(crate) fn generate(r_f: usize, r_p: usize, t: usize) -> (Vec<Vec<F>>, Mds<F>) {
         // Support only prime field construction
         const FIELD_TYPE: u8 = 1u8;
         // Support only \alpha s-box
@@ -79,7 +62,7 @@ impl<F: Field> Grain<F> {
             .map(|_| grain.next_field_element_without_rejection())
             .collect::<Vec<_>>();
 
-        (constants, MDS::cauchy(&xs, &ys))
+        (constants, Mds::cauchy(&xs, &ys))
     }
 
     /// Credit: https://github.com/zcash/halo2/tree/main/halo2_gadgets/src/primitives/poseidon

@@ -125,6 +125,12 @@ pub fn log2(x: usize) -> u32 {
     }
 }
 
+pub fn sqrt_strict(aa: usize) -> usize {
+    let a = num_integer::sqrt(aa);
+    assert_eq!(a * a, aa);
+    a
+}
+
 #[cfg(test)]
 pub(crate) mod test {
 
